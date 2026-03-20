@@ -20,7 +20,47 @@
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
-    <!-- Header -->
+    <div id="auth-overlay" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center px-6">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 bg-blue-600 rounded-xl">
+                    <i data-lucide="lock-keyhole" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <h2 id="auth-title" class="text-xl font-semibold">Secure Mission Control</h2>
+                    <p id="auth-subtitle" class="text-sm text-slate-400">Checking instance setup...</p>
+                </div>
+            </div>
+
+            <div class="mb-4 rounded-2xl border border-blue-500/20 bg-blue-500/10 px-4 py-3 text-sm text-slate-200">
+                <span id="auth-mode-note">This private instance requires a local account.</span>
+            </div>
+
+            <div id="auth-error" class="hidden mb-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200"></div>
+
+            <form id="auth-form" class="space-y-4">
+                <div id="auth-display-group" class="hidden">
+                    <label for="auth-display-name" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Display Name</label>
+                    <input id="auth-display-name" type="text" placeholder="Nabil" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="auth-username" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Username</label>
+                    <input id="auth-username" type="text" placeholder="owner" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="username">
+                </div>
+
+                <div>
+                    <label for="auth-password" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                    <input id="auth-password" type="password" placeholder="At least 10 characters" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="current-password">
+                </div>
+
+                <button id="auth-submit" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 text-sm font-semibold transition-all">
+                    Continue
+                </button>
+            </form>
+        </div>
+    </div>
+
     <header class="border-b border-slate-800 bg-slate-900/50 p-4 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <div class="p-2 bg-blue-600 rounded-lg">
@@ -29,10 +69,17 @@
             <h1 class="text-xl font-bold tracking-tight">0-HITL <span class="text-slate-500 font-normal">Mission Control</span></h1>
         </div>
         <div class="flex items-center gap-4">
+            <div id="auth-user-chip" class="hidden items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-xs border border-slate-700">
+                <i data-lucide="user-round" class="w-3.5 h-3.5"></i>
+                <span id="auth-user-label">anonymous</span>
+            </div>
             <div id="status-badge" class="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-xs border border-slate-700">
                 <span class="w-2 h-2 rounded-full bg-slate-500 animate-pulse"></span>
                 <span id="status-text">DISCONNECTED</span>
             </div>
+            <button id="logout-btn" class="hidden px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-sm font-medium transition-all">
+                Sign Out
+            </button>
             <button id="kill-btn" class="px-4 py-2 bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-500/30 rounded-lg text-sm font-medium transition-all flex items-center gap-2">
                 <i data-lucide="shield-off" class="w-4 h-4"></i> EMERGENCY STOP
             </button>
@@ -40,11 +87,10 @@
     </header>
 
     <main class="flex-1 flex overflow-hidden">
-        <!-- Sidebar: Sessions & Stats -->
         <aside class="w-72 border-r border-slate-800 p-6 flex flex-col gap-8 bg-slate-900/20">
             <div>
                 <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 block">Active Session</label>
-                <input id="session-input" type="text" value="e2e-test" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2">
+                <input id="session-input" type="text" value="personal-assistant" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2">
                 <button id="connect-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 text-sm font-medium transition-all">CONNECT</button>
             </div>
 
@@ -65,19 +111,65 @@
                     </div>
                 </div>
             </div>
+
+            <div id="share-panel" class="hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Session Access</label>
+                    <span id="share-mode-badge" class="text-[10px] uppercase tracking-widest text-blue-300 bg-blue-500/10 border border-blue-500/20 rounded-full px-2 py-1">Private</span>
+                </div>
+
+                <div id="share-note" class="text-xs text-slate-500 mb-4">This session is private by default.</div>
+                <div id="share-error" class="hidden rounded-2xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-200 mb-4"></div>
+                <div id="share-success" class="hidden rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200 mb-4"></div>
+                <div id="share-list" class="space-y-2 mb-4"></div>
+                <div id="share-empty" class="hidden text-xs text-slate-500 mb-4">No one else can access this session yet.</div>
+
+                <form id="share-form" class="space-y-3">
+                    <input id="share-username" type="text" placeholder="username" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="share-permission" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="viewer">Viewer</option>
+                        <option value="operator">Operator</option>
+                    </select>
+                    <button id="share-submit" type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 text-sm font-semibold transition-all">
+                        Grant Access
+                    </button>
+                </form>
+            </div>
+
+            <div id="owner-panel" class="hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Local Accounts</label>
+                    <span class="text-[10px] uppercase tracking-widest text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-1">Owner</span>
+                </div>
+
+                <div id="owner-users" class="space-y-2 mb-4"></div>
+                <div id="owner-empty" class="hidden text-xs text-slate-500 mb-4">No local accounts yet.</div>
+                <div id="owner-error" class="hidden rounded-2xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-200 mb-4"></div>
+                <div id="owner-success" class="hidden rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200 mb-4"></div>
+
+                <form id="owner-user-form" class="space-y-3">
+                    <input id="owner-display-name" type="text" placeholder="Display name" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input id="owner-username" type="text" placeholder="username" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input id="owner-password" type="password" placeholder="Temporary password" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="owner-role" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="member">Member</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button id="owner-submit" type="submit" class="w-full bg-slate-100 hover:bg-white text-slate-950 rounded-lg py-2 text-sm font-semibold transition-all">
+                        Create Account
+                    </button>
+                </form>
+            </div>
         </aside>
 
-        <!-- Center: Streams -->
         <section class="flex-1 flex flex-col overflow-hidden bg-black/20">
             <div id="stream-container" class="flex-1 overflow-y-auto p-6 space-y-6">
-                <!-- Messages will appear here -->
                 <div class="text-center text-slate-500 mt-20">
                     <i data-lucide="activity" class="w-12 h-12 mx-auto mb-4 opacity-20"></i>
-                    <p>Enter a Session ID and Connect to view live telemetry.</p>
+                    <p>Authenticate and connect to a session to view live telemetry.</p>
                 </div>
             </div>
 
-            <!-- Interaction Bar -->
             <div class="p-6 border-t border-slate-800 bg-slate-900/30">
                 <div class="flex gap-4">
                     <input id="chat-input" type="text" placeholder="Send a mission to the Orchestrator..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">

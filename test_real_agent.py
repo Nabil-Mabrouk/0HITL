@@ -13,13 +13,15 @@ async def test_real_agent():
     print("[0-HITL] Starting real E2E test...")
     load_dotenv()
 
-    if not os.getenv("OPENAI_API_KEY") and not os.getenv("ANTHROPIC_API_KEY"):
-        print("Error: No API key found in .env (OPENAI_API_KEY or ANTHROPIC_API_KEY required)")
+    if not os.getenv("GROQ_API_KEY") and not os.getenv("OPENAI_API_KEY") and not os.getenv("ANTHROPIC_API_KEY"):
+        print("Error: No API key found in .env (GROQ_API_KEY, OPENAI_API_KEY or ANTHROPIC_API_KEY required)")
         return
 
     skill_manager.load_skills("./skills")
 
-    engine = ZeroHitlEngine(model="gpt-4o")
+    engine = ZeroHitlEngine()
+    print(f"[0-HITL] Agent model: {engine.model}")
+    print(f"[0-HITL] Memory model: {engine.memory_model}")
     session = AgentSession(session_id=f"e2e-test-{uuid.uuid4().hex[:8]}")
 
     prompt = (

@@ -8,6 +8,8 @@ from typing import Optional
 class ToolRuntimeContext:
     session_id: str
     tool_name: Optional[str] = None
+    auth_user_id: Optional[str] = None
+    auth_username: Optional[str] = None
 
 
 _current_runtime_context: ContextVar[Optional[ToolRuntimeContext]] = ContextVar(
@@ -27,10 +29,34 @@ def get_current_session_id(default: Optional[str] = None) -> Optional[str]:
     return context.session_id
 
 
+def get_current_auth_user_id(default: Optional[str] = None) -> Optional[str]:
+    context = get_current_runtime_context()
+    if context is None:
+        return default
+    return context.auth_user_id or default
+
+
+def get_current_auth_username(default: Optional[str] = None) -> Optional[str]:
+    context = get_current_runtime_context()
+    if context is None:
+        return default
+    return context.auth_username or default
+
+
 @contextmanager
-def tool_runtime_context(session_id: str, tool_name: Optional[str] = None):
+def tool_runtime_context(
+    session_id: str,
+    tool_name: Optional[str] = None,
+    auth_user_id: Optional[str] = None,
+    auth_username: Optional[str] = None,
+):
     token = _current_runtime_context.set(
-        ToolRuntimeContext(session_id=session_id, tool_name=tool_name)
+        ToolRuntimeContext(
+            session_id=session_id,
+            tool_name=tool_name,
+            auth_user_id=auth_user_id,
+            auth_username=auth_username,
+        )
     )
     try:
         yield

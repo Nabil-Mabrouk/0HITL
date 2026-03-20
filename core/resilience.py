@@ -31,14 +31,22 @@ class CognitiveResilience:
         self.engine = engine
         self.failure_counter = {}
 
-    async def analyze_and_learn(self, error_msg: str, tool_call_context: str) -> str:
+    async def analyze_and_learn(
+        self,
+        error_msg: str,
+        tool_call_context: str,
+        user_id: str | None = None,
+    ) -> str:
         error_id = hash(error_msg + tool_call_context)
         self.failure_counter[error_id] = self.failure_counter.get(error_id, 0) + 1
 
         if self.failure_counter[error_id] > 3:
             return "CRITICAL ALERT: Repeated failures. Abandon this approach and try a radically different strategy."
 
-        past_fixes = await self.memory.search_related(f"Solution pour l'erreur : {error_msg}")
+        past_fixes = await self.memory.search_related(
+            f"Solution pour l'erreur : {error_msg}",
+            user_id=user_id,
+        )
         if past_fixes:
             return f"MEMORY RECALL: Similar error solved before. Suggested solution: {past_fixes[0]}"
 
@@ -63,10 +71,16 @@ class CognitiveResilience:
 
         return f"NEW DIAGNOSIS: {diagnosis_text}"
 
-    async def register_success(self, error_msg: str, solution_action: str):
+    async def register_success(
+        self,
+        error_msg: str,
+        solution_action: str,
+        user_id: str | None = None,
+    ):
         archive_content = f"FIX CONFIRMED for '{error_msg}' -> Action: {solution_action}"
         await self.memory.archive_message(
             content=archive_content,
             metadata={"type": "resilience_fix", "timestamp": str(datetime.now())},
+            user_id=user_id,
         )
         print("[0-HITL] New solution learned and archived.")

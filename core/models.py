@@ -3,6 +3,7 @@ from typing import List, Optional, Dict, Any, Union
 from datetime import datetime, timezone
 from enum import Enum
 
+
 class Role(str, Enum):
     SYSTEM = "system"
     USER = "user"
@@ -29,3 +30,26 @@ class AgentSession(BaseModel):
     session_id: str
     history: List[Message] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class AuthBootstrapRequest(BaseModel):
+    username: str
+    password: str
+    display_name: Optional[str] = None
+
+
+class AuthLoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class AuthCreateUserRequest(BaseModel):
+    username: str
+    password: str
+    display_name: Optional[str] = None
+    role: str = "member"
+
+
+class SessionPermissionRequest(BaseModel):
+    username: str
+    permission: str = "viewer"

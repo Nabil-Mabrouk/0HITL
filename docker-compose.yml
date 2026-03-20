@@ -2,15 +2,23 @@ services:
   0-hitl-brain:
     build: .
     container_name: zero-hitl-brain
+    env_file:
+      - .env
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./memory.db:/app/memory.db
-      - ./workspace:/app/workspace
-      - ./skills:/app/skills
-      - ./profiles:/app/profiles
-    environment:
-      - HOST_WORKSPACE_PATH=${PWD}/workspace
-      - HOST_SKILLS_PATH=${PWD}/skills
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+      - type: bind
+        source: ./memory.db
+        target: /app/memory.db
+      - type: bind
+        source: ./workspace
+        target: /app/workspace
+      - type: bind
+        source: ./skills
+        target: /app/skills
+      - type: bind
+        source: ./profiles
+        target: /app/profiles
     ports:
       - "8000:8000"

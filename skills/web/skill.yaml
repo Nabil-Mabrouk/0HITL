@@ -1,0 +1,7 @@
+name: web
+description: Recherche web et extraction de contenu HTTP en lecture seule.
+version: 1.0.0
+author: 0-HITL-Core
+required_permissions:
+  - network
+docker_image: python:3.12-slim

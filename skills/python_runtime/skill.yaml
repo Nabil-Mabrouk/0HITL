@@ -1,0 +1,8 @@
+name: python_runtime
+description: Execution Python structuree en sandbox et inspection CSV dans le workspace.
+version: 1.0.0
+author: 0-HITL-Core
+required_permissions:
+  - execution
+  - filesystem
+docker_image: python:3.12-slim

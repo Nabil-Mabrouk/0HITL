@@ -1,0 +1,7 @@
+name: tasks
+description: Gestion locale de taches personnelles par utilisateur pour 0-HITL.
+version: 1.0.0
+author: 0-HITL-Core
+required_permissions:
+  - filesystem
+docker_image: python:3.12-slim
