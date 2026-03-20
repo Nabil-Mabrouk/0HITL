@@ -1,0 +1,41 @@
+# Environnements virtuels
+workspace/env/
+.venv/
+venv/
+ENV/
+
+# Fichiers de cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Fichiers de base de données (sauf si nécessaire)
+*.db
+*.db-journal
+
+# Fichiers de logs
+*.log
+
+# Fichiers de configuration sensibles (si vous ne voulez pas versionner .env)
+.env
+.env.local
+*.env
+
+# Dossiers de build
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dossier workspace (contenu généré par l'IA)
+workspace/*
+!workspace/.gitkeep
+
+./vincent

@@ -1,0 +1,16 @@
+services:
+  0-hitl-brain:
+    build: .
+    container_name: zero-hitl-brain
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./memory.db:/app/memory.db
+      - ./workspace:/app/workspace
+      - ./skills:/app/skills
+      - ./profiles:/app/profiles
+    environment:
+      - HOST_WORKSPACE_PATH=${PWD}/workspace
+      - HOST_SKILLS_PATH=${PWD}/skills
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    ports:
+      - "8000:8000"
